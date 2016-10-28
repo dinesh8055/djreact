@@ -1,0 +1,48 @@
+from savedjobs.models import SavedJob
+from savedjobs.serializers import SavedJobSerializer
+from rest_framework.renderers import JSONRenderer
+from rest_framework.parsers import JSONParser
+
+s=SavedJob.objects.get(pk=1)
+
+serializer = SavedJobSerializer(s)
+
+serializer.data
+
+content = JSONRenderer().render(serializer.data)
+content
+
+from django.utils.six import BytesIO
+
+stream = BytesIO(content)
+data = JSONParser().parse(stream)
+
+serializer = SavedJobSerializer(data=data)
+
+serializer.is_valid()
+serializer.validated_data
+
+serializer = SavedJobSerializer(SavedJob.objects.all(), many=True)
+serializer.data
+
+serializer = SavedJobSerializer()
+print(repr(serializer))
+
+from rest_framework import serializers
+from savedjobs.models import SavedJob
+from rest_framework.validators import UniqueValidator
+
+class SavedJobSerializer(serializers.Serializer):
+    # class Meta:
+    #     model = SavedJob
+    #     fields = ('id', 'title', 'city', 'state', 'company', 'salary', 'salaryPer', 'description', 'postedDaysAgo', 'expireInDays')
+    id = serializers.IntegerField(required=False, validators=[UniqueValidator(queryset=SavedJob.objects.all())])
+    title = serializers.CharField(required=False, allow_blank=True, max_length=200)
+    city = serializers.CharField(required=False, allow_blank=True, max_length=50)
+    state = serializers.CharField(required=False, allow_blank=True, max_length=50)
+    company = serializers.CharField(required=False, allow_blank=True, max_length=200)
+    salary = serializers.CharField(required=False, allow_blank=True, max_length=50)
+    salaryPer = serializers.CharField(required=False, allow_blank=True, max_length=50)
+    description = serializers.CharField(required=False, allow_blank=True, max_length=200)
+    postedDaysAgo = serializers.IntegerField(required=False, allow_blank=True)
+    expireInDays = serializers.IntegerField(required=False, allow_blank=True)
